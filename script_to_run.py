@@ -25,10 +25,11 @@ else:
 
 
 
-file_name = 'test_video.mp4'
+#file_name = 'test_video.mp4'
+file_name = 'project_video.mp4'
 
 tracker = Tracker(featureList, Parameters, svc, scaler)
-clip1 = tracker.openVideo(file_name, 0, 5, 25)
+clip1 = tracker.openVideo(file_name, 30, 40, 25)
 
 
 def process_image(image):
