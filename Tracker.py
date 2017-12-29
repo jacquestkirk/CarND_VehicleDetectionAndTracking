@@ -27,6 +27,7 @@ class Tracker:
             y_start = searchWindowParameters.yRange[0]
             y_stop = searchWindowParameters.yRange[1]
             cells_per_step = searchWindowParameters.cellsPerStep  # Instead of overlap, define how many cells to step
+            svmThreshold = searchWindowParameters.svmThreshold
 
             img_tosearch = img[y_start:y_stop, :, :]
             ctrans_tosearch = FeatureExtractor.convert_color(img_tosearch, enum_ColorSpaces.ycrcb)
@@ -82,15 +83,15 @@ class Tracker:
                     test_features = self.scaler.transform(
                         np.hstack((hog_features, spatial_features, hist_features)).reshape(1, -1))
                     # test_features = X_scaler.transform(np.hstack((shape_feat, hist_feat)).reshape(1, -1))
-                    test_prediction = self.svc.predict(test_features)
+                    test_prediction = self.svc.decision_function(test_features)
 
-                    if test_prediction == 1:
+                    if test_prediction[0] > svmThreshold:
                         xbox_left = np.int(xleft * scale)
                         ytop_draw = np.int(ytop * scale)
                         win_draw = np.int(window * scale)
 
                         boundingBoxList.append(((xbox_left, ytop_draw + y_start),
-                                                (xbox_left + win_draw, ytop_draw + win_draw + y_start), weight))
+                                                (xbox_left + win_draw, ytop_draw + win_draw + y_start), weight*test_prediction[0]))
 
         return boundingBoxList
 

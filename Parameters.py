@@ -1,10 +1,11 @@
 
 class SearchWindowParameters:
-    def __init__(self, scale, weight, yrange, cellsPerStep):
+    def __init__(self, scale, weight, yrange, cellsPerStep, svmThreshold):
         self.scale = scale
         self.weight = weight
         self.yRange = yrange
         self.cellsPerStep = cellsPerStep
+        self.svmThreshold = svmThreshold
 
 class Parameters:
 
@@ -28,20 +29,24 @@ class Parameters:
         searchWindowList.append(SearchWindowParameters(scale=1.75,
                                                        weight=6,
                                                        yrange=(400, 656),
-                                                       cellsPerStep=2))
+                                                       cellsPerStep=2,
+                                                       svmThreshold=0))
         searchWindowList.append(SearchWindowParameters(scale=1.5,
                                                        weight=3,
                                                        yrange=(400, 656),
-                                                       cellsPerStep=2))
+                                                       cellsPerStep=2,
+                                                       svmThreshold=0))
         searchWindowList.append(SearchWindowParameters(scale=1.25,
                                                        weight=1,
                                                        yrange=(400, 500),
-                                                       cellsPerStep=4))
+                                                       cellsPerStep=4,
+                                                       svmThreshold=0))
         searchWindowList.append(SearchWindowParameters(scale=1,
-                                                       weight=0.5,
+                                                       weight=1,
                                                        yrange=(400, 450),
-                                                       cellsPerStep=4))
-        threshold = 2
+                                                       cellsPerStep=4,
+                                                       svmThreshold=0))
+        threshold = 1.5
         averages = 15
 
     class Annotation:
