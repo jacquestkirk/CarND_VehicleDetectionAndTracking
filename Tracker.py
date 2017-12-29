@@ -21,13 +21,15 @@ class Tracker:
         img = image.astype(np.float32) / 255
 
 
+        for searchWindowParameters in self.parameters.SearchSettings.searchWindowList:
+            scale = searchWindowParameters.scale
+            weight = searchWindowParameters.weight
+            y_start = searchWindowParameters.yRange[0]
+            y_stop = searchWindowParameters.yRange[1]
+            cells_per_step = searchWindowParameters.cellsPerStep  # Instead of overlap, define how many cells to step
 
-        img_tosearch = img[self.parameters.SearchSettings.y_start:self.parameters.SearchSettings.y_stop, :, :]
-        ctrans_tosearch = FeatureExtractor.convert_color(img_tosearch, enum_ColorSpaces.ycrcb)
-
-        for scaleAndWeight in self.parameters.SearchSettings.scale:
-            scale = scaleAndWeight[0]
-            weight = scaleAndWeight[1]
+            img_tosearch = img[y_start:y_stop, :, :]
+            ctrans_tosearch = FeatureExtractor.convert_color(img_tosearch, enum_ColorSpaces.ycrcb)
 
             if scale != 1:
                 imshape = ctrans_tosearch.shape
@@ -38,17 +40,14 @@ class Tracker:
                 img_converted = img_tosearch
 
             # Define blocks and steps as above
-            nxblocks = (img_converted.shape[
-                            1] // self.parameters.HogSettings.pix_per_cell) - self.parameters.HogSettings.cell_per_block + 1
-            nyblocks = (img_converted.shape[
-                            0] // self.parameters.HogSettings.pix_per_cell) - self.parameters.HogSettings.cell_per_block + 1
+            nxblocks = (img_converted.shape[1] // self.parameters.HogSettings.pix_per_cell) - self.parameters.HogSettings.cell_per_block + 1
+            nyblocks = (img_converted.shape[0] // self.parameters.HogSettings.pix_per_cell) - self.parameters.HogSettings.cell_per_block + 1
             nfeat_per_block = self.parameters.HogSettings.orient * self.parameters.HogSettings.cell_per_block ** 2
 
             # 64 was the orginal sampling rate, with 8 cells and 8 pix per cell
-            window = 64
-            nblocks_per_window = (
-                                 window // self.parameters.HogSettings.pix_per_cell) - self.parameters.HogSettings.cell_per_block + 1
-            cells_per_step = 2  # Instead of overlap, define how many cells to step
+            window = self.parameters.HogSettings.pix_per_cell**2
+            nblocks_per_window = (window // self.parameters.HogSettings.pix_per_cell) - self.parameters.HogSettings.cell_per_block + 1
+
             nxsteps = (nxblocks - nblocks_per_window) // cells_per_step + 1
             nysteps = (nyblocks - nblocks_per_window) // cells_per_step + 1
 
@@ -90,8 +89,8 @@ class Tracker:
                         ytop_draw = np.int(ytop * scale)
                         win_draw = np.int(window * scale)
 
-                        boundingBoxList.append(((xbox_left, ytop_draw + self.parameters.SearchSettings.y_start),
-                                                (xbox_left + win_draw, ytop_draw + win_draw + self.parameters.SearchSettings.y_start), weight))
+                        boundingBoxList.append(((xbox_left, ytop_draw + y_start),
+                                                (xbox_left + win_draw, ytop_draw + win_draw + y_start), weight))
 
         return boundingBoxList
 
