@@ -96,7 +96,7 @@ class Tracker:
         return boundingBoxList
 
     def generateHeatMap(self, image, bounding_boxes, threshold=1):
-        heatmap = np.zeros_like(image)
+        heatmap = np.zeros_like(image, dtype=np.float32)
         for box in bounding_boxes:
             # Add += 1 for all pixels inside each bbox
             # Assuming each "box" takes the form ((x1, y1), (x2, y2))
