@@ -167,7 +167,7 @@ class Tracker:
                 bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
 
                 #find the max heatmap value inside that bounding box
-                maxVal = np.max(heatmap[[bbox[0][1],bbox[1][1]],[bbox[0][0],bbox[1][0]]])
+                maxVal = np.max(heatmap[bbox[0][1]:bbox[1][1],bbox[0][0]:bbox[1][0]])
 
                 # Draw the box on the image
                 cv2.rectangle(draw_img, bbox[0], bbox[1], (255, 0, 0), 10)
