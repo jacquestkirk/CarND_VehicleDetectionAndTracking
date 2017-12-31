@@ -73,7 +73,10 @@ class Tracker:
                     ytop = ypos * self.parameters.HogSettings.pix_per_cell
 
                     # Extract the image patch
-                    subimg = cv2.resize(ctrans_tosearch[ytop:ytop + window, xleft:xleft + window], (64, 64))
+                    selected_image = ctrans_tosearch[ytop:ytop + window, xleft:xleft + window]
+                    if selected_image.shape != (window,window,3):
+                        continue
+                    subimg = cv2.resize(selected_image, (64, 64))
 
                     # Get color features
                     spatial_features = FeatureExtractor.bin_spatial(subimg, size=self.parameters.SpatialSettings.new_size)
@@ -85,13 +88,33 @@ class Tracker:
                     # test_features = X_scaler.transform(np.hstack((shape_feat, hist_feat)).reshape(1, -1))
                     test_prediction = self.svc.decision_function(test_features)
 
-                    if test_prediction[0] > svmThreshold:
+                    if test_prediction[0] > 0:
                         xbox_left = np.int(xleft * scale)
                         ytop_draw = np.int(ytop * scale)
                         win_draw = np.int(window * scale)
 
+                        if test_prediction[0] < -0.5:
+                            color = (255,0,0)
+                        elif test_prediction < 0.5:
+                            color = (0,255,0)
+                        elif test_prediction < 1:
+                            color = (0,0,255)
+                        elif test_prediction < 1.5:
+                            color = (255,255,0) #yellow
+                        else:
+                            color = (0,255,255) #purple
+
+
+                        #draw the bouding box, but don't count in heatmap if value is less than threshold
+                        if test_prediction[0] > searchWindowParameters.svmThreshold:
+                            scaled_weight = weight*test_prediction[0]
+                        else:
+                            scaled_weight = 0
+
+
+
                         boundingBoxList.append(((xbox_left, ytop_draw + y_start),
-                                                (xbox_left + win_draw, ytop_draw + win_draw + y_start), weight*test_prediction[0]))
+                                                (xbox_left + win_draw, ytop_draw + win_draw + y_start), scaled_weight, color))
 
         return boundingBoxList
 
@@ -126,10 +149,11 @@ class Tracker:
 
         if self.parameters.Annotation.bounding_box_individual:
             for box in bounding_boxes:
+                color = box[3]
                 cv2.rectangle(draw_img,
                               box[0],
                               box[1],
-                              (0, 0, 255),
+                              color,
                               6)
 
         if self.parameters.Annotation.bounding_box_heatmap_average:
