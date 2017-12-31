@@ -25,6 +25,7 @@ class Parameters:
         #y_start = 400
         #y_stop = 656
         #scale = [[1.75, 6], [1.5,3], [2,9], [1.25, 0.25]] #[1.25, 1.5, 1.75]
+        min_hotspot = 0
         searchWindowList = []
         searchWindowList.append(SearchWindowParameters(scale=1.75,
                                                        weight=6,

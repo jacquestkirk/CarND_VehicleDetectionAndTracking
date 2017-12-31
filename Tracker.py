@@ -136,8 +136,8 @@ class Tracker:
         heatmap_average[heatmap_average <= threshold] = 0
         # Return thresholded map
 
-        heatmap_scaled = heatmap_average * 255 / np.max(heatmap_average)
-        return heatmap_scaled.astype('uint8')
+
+        return heatmap_average
 
     def generateLabels(self, heatmap):
         labels = label(heatmap)
@@ -169,12 +169,16 @@ class Tracker:
                 #find the max heatmap value inside that bounding box
                 maxVal = np.max(heatmap[bbox[0][1]:bbox[1][1],bbox[0][0]:bbox[1][0]])
 
+                if maxVal < self.parameters.SearchSettings.min_hotspot:
+                    continue
+
                 # Draw the box on the image
                 cv2.rectangle(draw_img, bbox[0], bbox[1], (255, 0, 0), 10)
-                cv2.putText(draw_img, str(maxVal), bbox[0], cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
+                cv2.putText(draw_img, str.format('{:.1f}',maxVal), bbox[0], cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
 
         if self.parameters.Annotation.heatmap:
-            draw_img = cv2.addWeighted(draw_img, 0.5, heatmap, 1, 0)
+            heatmap_scaled = heatmap * 255 / np.max(heatmap)
+            draw_img = cv2.addWeighted(draw_img, 0.5, heatmap_scaled.astype('uint8'), 1, 0)
 
         return draw_img
 
