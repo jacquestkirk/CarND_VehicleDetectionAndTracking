@@ -165,8 +165,13 @@ class Tracker:
                 nonzerox = np.array(nonzero[1])
                 # Define a bounding box based on min/max x and y
                 bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
+
+                #find the max heatmap value inside that bounding box
+                maxVal = np.max(heatmap[[bbox[0][1],bbox[1][1]],[bbox[0][0],bbox[1][0]]])
+
                 # Draw the box on the image
                 cv2.rectangle(draw_img, bbox[0], bbox[1], (255, 0, 0), 10)
+                cv2.putText(draw_img, str(maxVal), bbox[0], cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
 
         if self.parameters.Annotation.heatmap:
             draw_img = cv2.addWeighted(draw_img, 0.5, heatmap, 1, 0)
