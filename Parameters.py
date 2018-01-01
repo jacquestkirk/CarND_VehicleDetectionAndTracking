@@ -38,21 +38,21 @@ class Parameters:
                                                        cellsPerStep=2,
                                                        svmThreshold=0))
         searchWindowList.append(SearchWindowParameters(scale=1.25,
-                                                       weight=1,
+                                                       weight=0.5,
                                                        yrange=(400, 500),
                                                        cellsPerStep=2,
-                                                       svmThreshold=1))
+                                                       svmThreshold=0.5))
         searchWindowList.append(SearchWindowParameters(scale=1,
-                                                       weight=1,
+                                                       weight=0.5,
                                                        yrange=(400, 500),
                                                        cellsPerStep=1,
-                                                       svmThreshold=1))
+                                                       svmThreshold=0.5))
         #searchWindowList.append(SearchWindowParameters(scale=0.75,
         #                                               weight=1,
         #                                               yrange=(400, 500),
         #                                               cellsPerStep=1,
         #                                               svmThreshold=0))
-        threshold = 2
+        threshold = 1.5
         averages = 15
 
     class Annotation:
