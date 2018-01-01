@@ -25,7 +25,7 @@ class Parameters:
         #y_start = 400
         #y_stop = 656
         #scale = [[1.75, 6], [1.5,3], [2,9], [1.25, 0.25]] #[1.25, 1.5, 1.75]
-        min_hotspot = 5
+        min_hotspot = 3
         searchWindowList = []
         searchWindowList.append(SearchWindowParameters(scale=1.75,
                                                        weight=6,
@@ -53,7 +53,7 @@ class Parameters:
         #                                               cellsPerStep=1,
         #                                               svmThreshold=0))
         threshold = 1.5
-        averages = 15
+        averages = 10
 
     class Annotation:
         bounding_box_individual = False
