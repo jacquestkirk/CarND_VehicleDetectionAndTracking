@@ -146,8 +146,7 @@ I did numerous things to try to reduce false positives:
 	Averaging helps to pick up the slack if a car is not detected in one frame though it is detected in other surrounding frames. It also helps to eliminate false detections that pop up between frames. Though, this makes it hard to detect cars that are moving fast in the image, such as those on the opposite side of the road. 
 
 
-![alt text][image4]
----
+![alt text](./writeup_images/Annotated_Pipeline.jpg)
 
 ### Video Implementation
 
