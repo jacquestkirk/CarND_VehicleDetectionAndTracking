@@ -1,3 +1,6 @@
+# Hi Grader
+Writeup for this project is [here](https://github.com/jacquestkirk/CarND_VehicleDetectionAndTracking/blob/master/writeup_template.md)
+
 # Vehicle Detection
 [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
