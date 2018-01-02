@@ -51,7 +51,7 @@ A fully annotated version of the video is also provided as [processed_annotated.
 - [**Trainer.py**:](https://github.com/jacquestkirk/CarND_VehicleDetectionAndTracking/blob/master/Trainer.py) Trains a SVM classifier on the car and not-car data. This class is responsible for the following: 
   1. Using the glob library to pull references for all training images. (Trainer.buildTrainingSet())
   2. Using FeatureExtractor.py to extract features (Trainer.extractFeatures())
-  3. Training the SVM. Trainer.train()
+  3. Training the SVM. (Trainer.train())
  - [**Tracker.py:**](https://github.com/jacquestkirk/CarND_VehicleDetectionAndTracking/blob/master/Tracker.py) The video processing pipleine. Which consists of the following: 
    1. Find bounding boxes (Tracker.findBoundingBoxes())
    2. Generate heatmap and labels (Tracker.generateHeatMap() and Tracker.generateLabels())
@@ -61,7 +61,7 @@ A fully annotated version of the video is also provided as [processed_annotated.
 
 #### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-I would have preferred to use the same code for extracting HOG features for training and video processing. Since I wanted to use HOG sub-sampling window search for the video processing pipeline, I ended up having to write two seperate functions in order to increase processing time efficiency. The second best thing I could do was pull settings from the same set of parameters, so the arguments for calculating HOG features can be found in [Parameters.py](https://github.com/jacquestkirk/CarND_VehicleDetectionAndTracking/blob/master/Parameters.py) under Parameters.HogSettings
+I would have preferred to use the same code for extracting HOG features for training and video processing. Since I wanted to use HOG sub-sampling window search for the video processing pipeline, however, I ended up having to write two seperate functions in order to increase processing time efficiency. The second best thing I could do was pull settings from the same set of parameters, so the arguments for calculating HOG features can be found in [Parameters.py](https://github.com/jacquestkirk/CarND_VehicleDetectionAndTracking/blob/master/Parameters.py) under Parameters.HogSettings
 
 The code for extracting features lives in [FeatureExtractor.py](https://github.com/jacquestkirk/CarND_VehicleDetectionAndTracking/blob/master/FeatureExtractor.py). The HOG features specifically are calculated in FeatureExtractor.get_hog_features for training. 
 
@@ -89,6 +89,8 @@ The features I ended up using are shown in lines 9-11 of [script_to_run.py ](htt
 
 #### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
+Training is done using the Trainer class in [Trainer.py](https://github.com/jacquestkirk/CarND_VehicleDetectionAndTracking/blob/master/Trainer.py).
+
 I used glob to pull all the car and not-car data from the training set using my Trainer.buildTrainingSet() function. 
 
 The training itsself happens in Trainer.train. I extracted all the features (described in question 2) from the image using FeatureExtractor.findAllFeatures(). These features were compiled into two large matrices: Trainer.carFeatures and Trainer.notCarFeatures. These are stacked, scaled, and split into training and validation sets. I fit the data using sklearn's LinearSVC function(). Then I checked the accuracy of the validation set to make sure the my fit worked well. 
@@ -110,15 +112,15 @@ I ended up checking 4 scales:
   - weight = 6
   - y range = 400 to 656
   - cells per step = 2
- - scale = 1.5:
+- scale = 1.5:
   - weight = 3
   - y range = 400 to 656
   - cells per step = 2
- - scale = 1.25:
+- scale = 1.25:
   - weight = 0.5
   - y range = 400 to 500
   - cells per step = 2
- - scale = 1:
+- scale = 1:
   - weight = 0.5
   - y range = 400 to 500
   - cells per step = 1
@@ -131,19 +133,19 @@ I tested the pipleine on the short test video test_video.mp4. Some sreenshots fr
 I did numerous things to try to reduce false positives:
 - **Heatmaps:** 
 
-     I used a heatmap to combine multiple windows. Areas with high amounts of overlap are considered a good detection. I thresholded the heatmap to eliminate weak detections. 
+     I used a heatmap to combine multiple windows. Areas with high amounts of overlap are considered a good detection. I thresholded the heatmap to eliminate weak detections. These are calculated in Tracker.generateHeatMap(). Labels can be generated from these heatmaps using Tracker.generateLabels. 
 - **Weight heatmap contributions:** 
 
-	Smaller scales seemed more likely to pick up false positives so I weighted these less than larger scales. It can still be a correct detection if a bunch of small scale stack up. But a small scale off by itsself is unlikely to trigger a detection. 
+	Smaller scales seemed more likely to pick up false positives so I weighted these less than larger scales. It can still be a correct detection if a bunch of small scale stack up. But a small scale off by itsself is unlikely to trigger a detection. This is seen in the the scale selections in Parameters.SearchSettings.searchWindowList.
 - **Use svc.decision_function() instead of svc.predict() and threshold the output of the decision function:** 
 
-	The search window parameters in Parameters.SearchSettings have a svmThreshold variable. It filters out bounding boxes that have a decision function less than that threshold. This helps to rule out weak detections. The confidence is also multiplied by the weight when deciding how much heat to add to the heatmap. That way more confident decisions are weighted more heavily. 
+	The search window parameters in Parameters.SearchSettings have a svmThreshold variable. It filters out bounding boxes that have a decision function less than that threshold. This helps to rule out weak detections. The confidence is also multiplied by the weight when deciding how much heat to add to the heatmap. That way more confident decisions are weighted more heavily. This is done in line 89- 116 of Tracker.py in the Tracker.findBoundingBoxes().
 - **Threshold on the maximum heat in a label:** 
 
-	Good detections seemed to have hotspots in the heatmap while poor detections are more sparsely distributed. Therefore I put a threshold on the maximum point in the heatmap. This is set by the Parameters.SearchSettings.min_hotspot parameter. 
+	Good detections seemed to have hotspots in the heatmap while poor detections are more sparsely distributed. Therefore I put a threshold on the maximum point in the heatmap. This is set by the Parameters.SearchSettings.min_hotspot parameter and implemented in Tracker.annotate()(line 170-173)
 - **Average through multiple frames:** 
 
-	Averaging helps to pick up the slack if a car is not detected in one frame though it is detected in other surrounding frames. It also helps to eliminate false detections that pop up between frames. Though, this makes it hard to detect cars that are moving fast in the image, such as those on the opposite side of the road. 
+	Averaging helps to pick up the slack if a car is not detected in one frame though it is detected in other surrounding frames. It also helps to eliminate false detections that pop up between frames. Though, this makes it hard to detect cars that are moving fast in the image, such as those on the opposite side of the road. This is done in Tracker.generateHeatmap()(lines 32-33)
 
 
 ![alt text](./writeup_images/Annotated_Pipeline.jpg)
@@ -163,7 +165,7 @@ The detector is able to detect the cars most of the time and with minimal false 
 
 I answered this question in the section titled, "Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?"
 
-But a summary of that is...
+But a summary of that is below, but refer to the previous question for full details. 
 - **Heatmaps** 
 - **Weight heatmap contributions**
 - **Use svc.decision_function() instead of svc.predict() and threshold the output of the decision function** 
